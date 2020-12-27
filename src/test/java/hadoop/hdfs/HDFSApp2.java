@@ -1,10 +1,7 @@
 package hadoop.hdfs;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.util.Progressable;
 import org.junit.After;
@@ -111,6 +108,66 @@ public class HDFSApp2 {
         Path src = new Path("/hdfsapi/test/c.txt");
         Path dst = new Path("E:/hadoop");
         fileSystem.copyToLocalFile(false,src,dst,true);
+    }
+
+    /*
+     * 查看目标文件夹下的所有文件
+     */
+    @Test
+    public void listFiles() throws IOException {
+        FileStatus[] statuses = fileSystem.listStatus(new Path("/hdfsapi/test"));
+        for (FileStatus file : statuses){
+            String isDir = file.isDirectory()?"文件夹":"文件";
+            String permission = file.getPermission().toString();
+            short replication = file.getReplication();
+            long length = file.getLen();
+            String path = file.getPath().toString();
+
+            System.out.println(isDir+"\t"+permission+"\t"+replication+"\t"+length+"\t"+path);
+        }
+    }
+
+    /*
+     * 递归查看目标文件夹下的所有文件
+     */
+    @Test
+    public void listFilesRecursive() throws IOException {
+        RemoteIterator<LocatedFileStatus> files = fileSystem.listFiles(new Path("/hdfsapi/test"),true);
+
+        while (files.hasNext()){
+            LocatedFileStatus file = files.next();
+            String isDir = file.isDirectory()?"文件夹":"文件";
+            String persission = file.getPermission().toString();
+            short replication = file.getReplication();
+            long length = file.getLen();
+            String path = file.getPath().toString();
+
+            System.out.println(isDir+"\t"+persission+"\t"+replication+"\t"+length+"\t"+path);
+        }
+    }
+
+    /*
+     * 查看文件块信息
+     */
+    @Test
+    public void getFileBlockLocations() throws IOException {
+        FileStatus fileStatus = fileSystem.getFileStatus(new Path("/hdfsapi/test/wps.exe"));
+        BlockLocation[] blocks = fileSystem.getFileBlockLocations(fileStatus,0,fileStatus.getLen());
+
+        for (BlockLocation block : blocks){
+            for (String name : block.getNames()){
+                System.out.println(name+":"+block.getOffset()+":"+block.getLength()+":"+block.getHosts());
+            }
+        }
+    }
+
+    /*
+     * 删除文件
+     */
+    @Test
+    public void delete() throws IOException {
+        boolean result = fileSystem.delete(new Path("/hdfsapi/test/wps.exe"),true);
+        System.out.println(result);
     }
 
     @After
