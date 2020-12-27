@@ -80,7 +80,7 @@ public class HDFSApp2 {
      */
     @Test
     public void copyFromLocalFile() throws IOException {
-        Path src = new Path("C:/Users/ccxy/Desktop/12/组会/服务器.txt");
+        Path src = new Path("E:/hadoop/hello.txt");
         Path dst = new Path("/hdfsapi/test/");
         fileSystem.copyFromLocalFile(src,dst);
     }
